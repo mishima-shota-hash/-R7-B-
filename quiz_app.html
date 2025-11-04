@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科学と人間生活 - 生態系 学習クイズ</title>
+    <!-- Tailwind CSSを読み込み -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Interフォントを読み込み */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+        /* カスタムスタイル */
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-color: #3b82f6; /* blue-500 */
+            color: #3b82f6;
+            background-color: #eff6ff; /* blue-50 */
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .feedback {
+            display: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+        }
+        .feedback.correct {
+            display: block;
+            background-color: #dcfce7; /* green-100 */
+            color: #166534; /* green-800 */
+            border: 1px solid #86efac; /* green-300 */
+        }
+        .feedback.incorrect {
+            display: block;
+            background-color: #fee2e2; /* red-100 */
+            color: #991b1b; /* red-800 */
+            border: 1px solid #fca5a5; /* red-300 */
+        }
+        .answer-key {
+            display: none;
+            background-color: #f3f4f6; /* gray-100 */
+            border: 1px solid #e5e7eb; /* gray-200 */
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto max-w-4xl p-4 sm:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">科学と人間生活</h1>
+            <p class="text-lg sm:text-xl text-blue-600 font-semibold mt-2">生態系ポスター作成課題 学習クイズ</p>
+        </header>
+
+        <!-- タブナビゲーション -->
+        <nav class="flex justify-center border-b border-gray-300 mb-8" id="tab-nav">
+            <button class="tab-button active text-sm sm:text-base font-medium py-3 px-4 sm:px-6 border-b-2 border-transparent hover:border-gray-400 hover:bg-gray-100" data-tab="tab1">
+                一問一答 (20問)
+            </button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-4 sm:px-6 border-b-2 border-transparent hover:border-gray-400 hover:bg-gray-100" data-tab="tab2">
+                論述問題 (10問)
+            </button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-4 sm:px-6 border-b-2 border-transparent hover:border-gray-400 hover:bg-gray-100" data-tab="tab3">
+                振り返り問題 (6問)
+            </button>
+        </nav>
+
+        <!-- タブコンテンツ -->
+        <main id="tab-container">
+            <!-- タブ1: 一問一答 -->
+            <section id="tab1" class="tab-content active space-y-6">
+                <h2 class="text-2xl font-semibold text-gray-800 border-l-4 border-blue-500 pl-3">一問一答問題</h2>
+                <div id="quiz-fill-in" class="space-y-4">
+                    <!-- JavaScriptで問題が挿入されます -->
+                </div>
+                <button id="check-fill-in" class="mt-6 w-full sm:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                    一斉に答え合わせ
+                </button>
+                <button id="reset-fill-in" class="mt-6 ml-0 sm:ml-4 w-full sm:w-auto px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+                    リセット
+                </button>
+            </section>
+
+            <!-- タブ2: 論述問題 -->
+            <section id="tab2" class="tab-content space-y-6">
+                <h2 class="text-2xl font-semibold text-gray-800 border-l-4 border-blue-500 pl-3">論述問題</h2>
+                <div id="quiz-essay" class="space-y-5">
+                    <!-- JavaScriptで問題が挿入されます -->
+                </div>
+            </section>
+
+            <!-- タブ3: 振り返り問題 -->
+            <section id="tab3" class="tab-content space-y-6">
+                <h2 class="text-2xl font-semibold text-gray-800 border-l-4 border-blue-500 pl-3">振り返り問題</h2>
+                <div id="quiz-multiple-choice" class="space-y-8">
+                    <!-- JavaScriptで問題が挿入されます -->
+                </div>
+                <button id="submit-mc" class="mt-6 w-full px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition duration-300 text-lg">
+                    採点する！
+                </button>
+                 <button id="reset-mc" class="mt-4 w-full px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+                    リセット
+                </button>
+            </section>
+        </main>
+
+    </div>
+
+    <script>
+        // --- 問題データ ---
+
+        // 一問一答問題データ
+        const fillInQuestions = [
+            { q: "光合成によって有機物を作り出し、生態系の基礎を支える生物を何と呼びますか。", a: "生産者" },
+            { q: "生物の死骸や排泄物を分解し、土壌に栄養塩を戻す生物を何と呼びますか。", a: "分解者" },
+            { q: "宍道湖のように淡水と海水が混じり合う水域を何と呼びますか。", a: "汽水域" },
+            { q: "宍道湖で大量に生息し、島根県の特産品としても有名な二枚貝は何ですか。", a: "ヤマトシジミ" },
+            { q: "有明海の干潟で見られる、大きなハサミを持つカニの仲間は何ですか。", a: "シオマネキ" },
+            { q: "有明海の干潟で泥の上を胸びれで這い回る特徴的な魚は何ですか。", a: "ムツゴロウ" },
+            { q: "北海道の羅臼沖に冬季に現れる海氷を何と呼びますか。", a: "流氷" },
+            { q: "羅臼の海域で見られる大型の海洋哺乳類を総称して何と呼びますか。", a: "鯨類（クジラ類）" },
+            { q: "沼津湾が面する日本最深の湾の名称は何ですか。", a: "駿河湾" },
+            { q: "深海魚の多くが持つ、暗闇で光を発する器官を何と呼びますか。", a: "発光器" },
+            { q: "赤名湿地で見られる、昆虫を捕獲する植物を総称して何と呼びますか。", a: "食虫植物" },
+            { q: "湿地で水はけが悪く、植物遺骸が堆積してできる土壌を何と呼びますか。", a: "泥炭" },
+            { q: "長野の北アルプスで樹木が生育できなくなる標高の限界線を何と呼びますか。", a: "森林限界" },
+            { q: "北アルプスの高山帯に生息し、季節で羽毛の色が変わる鳥は何ですか。", a: "ライチョウ" },
+            { q: "生産者を直接食べる動物を何次消費者と呼びますか。", a: "一次消費者" },
+            { q: "複数の食物連鎖が網の目のように絡み合った関係を何と呼びますか。", a: "食物網" },
+            { q: "生態系でその存在が他の多くの種に決定的影響を与える種を何と呼びますか。", a: "キーストーン種" },
+            { q: "特定の地域にのみ自然に生息する生物種を何と呼びますか。", a: "固有種" },
+            { q: "生物量が食物連鎖の上位ほど少なくなる様子を図で表したものを何と呼びますか。", a: "生態ピラミッド" },
+            { q: "ポスター作成で情報の出典を記載する際、最も適切な位置はどこですか。", a: "右下などの隅" }
+        ];
+
+        // 論述問題データ
+        const essayQuestions = [
+            { q: "宍道湖の汽水環境が多様な生物を育む理由を説明しなさい。（20～40字）", a: "塩分濃度の勾配により、様々な塩分耐性を持つ生物が共存できるため。（35字）" },
+            { q: "有明海の干潟が豊かな生物多様性を支える理由を述べなさい。（20～40字）", a: "潮汐で栄養塩が供給され、多様な底生生物の生息場所となるため。（33字）" },
+            { q: "羅臼沖の流氷が海洋生態系に与える恩恵を説明しなさい。（20～40字）", a: "流氷が栄養塩を運び、春のプランクトン大増殖を引き起こすため。（32字）" },
+            { q: "駿河湾の深海生物が発光器官を持つ意義を述べなさい。（20～40字）", a: "暗闇での餌の誘引、仲間との交信、捕食者回避に必要なため。（30字）" },
+            { q: "赤名湿地の貧栄養環境で食虫植物が生存できる理由を述べなさい。（20～40字）", a: "土壌の不足栄養を昆虫の捕食により補う適応戦略があるため。（30字）" },
+            { q: "北アルプスの森林限界以上で樹木が育たない理由を述べなさい。（20～40字）", a: "低温と強風により生育期間が短く、樹木成長に必要な条件が不足するため。（37字）" },
+            { q: "生態系で分解者が重要な役割を果たす理由を説明しなさい。（20～40字）", a: "有機物を無機物に戻し、生産者が利用可能な栄養塩を供給するため。（33字）" },
+            { q: "食物連鎖の上位ほど個体数が少なくなる理由を述べなさい。（20～40字）", a: "エネルギーが各段階で大部分失われ、上位ほど利用可能量が減るため。（34字）" },
+            { q: "ポスターで出典を明記することの重要性を説明しなさい。（20～40字）", a: "情報の信頼性確保と著作権尊重により、正確な知識伝達を保証するため。（35字）" },
+            { q: "湿地生態系が地球環境保全で重要な理由を一つ述べなさい。（20～40字）", a: "大量の二酸化炭素を吸収貯蔵し、気候変動の緩和に貢献するため。（32字）" }
+        ];
+
+        // 振り返り問題（多肢選択）データ
+        const mcQuestions = [
+            {
+                q: "宍道湖の生態系において、植物プランクトンをヤマトシジミが食べ、そのヤマトシジミをスズキが捕食するという食物連鎖が見られます。この食物連鎖を矢印で表現する場合、正しい表記はどれですか。",
+                options: [
+                    "スズキ → ヤマトシジミ → 植物プランクトン",
+                    "植物プランクトン → ヤマトシジミ → スズキ",
+                    "ヤマトシジミ → 植物プランクトン → スズキ",
+                    "スズキ ← ヤマトシジミ ← 植物プランクトン"
+                ],
+                answer: 1, // 0-indexed
+                explanation: "食物連鎖の矢印は、エネルギーの流れる方向を示します。つまり、食べられる側から食べる側へと矢印を向けるのが正しい表記法です。植物プランクトン（生産者）が光合成で作り出したエネルギーが、ヤマトシジミ（一次消費者）、スズキ（二次消費者）へと順次移動していくことを表現しています。"
+            },
+            {
+                q: "各地域の生態系において、キーストーン種と呼ばれる生物が重要な役割を果たしています。キーストーン種とその生態系への影響について、最も適切な説明はどれですか。",
+                options: [
+                    "宍道湖のヤマトシジミは、個体数が最も多いため、湖の生態系を支配するキーストーン種である",
+                    "有明の干潟のムツゴロウは、見た目が特徴的で観光資源となるため、キーストーン種と呼ばれる",
+                    "北海道の羅臼のシャチは、海洋生態系の頂点捕食者として他の海洋動物の個体数を調節し、生態系全体のバランスを保つキーストーン種である",
+                    "赤名湿地の食虫植物は、絶滅危惧種に指定されているため、自動的にキーストーン種となる"
+                ],
+                answer: 2,
+                explanation: "キーストーン種とは、その個体数に比べて生態系全体に非常に大きな影響を与える種のことです。羅臼のシャチは、アザラシやトドなどの海獣の個体数を調節することで、これらの動物が捕食する魚類や甲殻類の個体数にも間接的に影響を与えます。この捕食圧の調節により、海洋生態系全体の食物連鎖のバランスが保たれ、結果として豊かな生物多様性が維持されます。"
+            },
+            {
+                q: "長野の北アルプスの高山帯に生息する植物が示す環境適応として、最も適切なものはどれですか。",
+                options: [
+                    "高木化して他の植物より高い位置で光を獲得する",
+                    "大きく薄い葉を発達させて効率的に光合成を行う",
+                    "クッション状の低い草本となり、強風と低温に耐える形態を発達させる",
+                    "完全に地下茎のみで生育し、地上部を持たない"
+                ],
+                answer: 2,
+                explanation: "高山帯は低温、強風、短い生育期間、強い紫外線など、植物にとって非常に厳しい環境条件が揃っています。このような環境に適応するため、高山植物の多くはクッション状の低い形態を発達させています。この形態により、風による水分損失を抑制し、地表近くの比較的温暖な空気を利用でき、雪による物理的な損傷も避けることができます。"
+            },
+            {
+                q: "沼津湾に面する駿河湾の深海生態系の特徴として正しいものはどれですか。",
+                options: [
+                    "浅い海域のため、サンゴ礁が発達している",
+                    "日本で最も深い湾であり、深海魚や深海性無脊椎動物が多様に生息している",
+                    "淡水の流入により汽水域となっている",
+                    "冬季に海面が凍結する寒冷な海域である"
+                ],
+                answer: 1,
+                explanation: "駿河湾は日本最深の湾で、最深部は約2,500mに達します。この深海環境では、高水圧、低温、暗黒という極限的な条件下で、特殊な適応を遂げた深海生物が多様に生息しています。深海魚は発光器官や大きな口と胃を持ち、深海性無脊椎動物も独特の形態と生理機能を発達させています。"
+            },
+            {
+                q: "赤名湿地のような貧栄養な湿地環境で食虫植物が見られる理由として、最も適切なものはどれですか。",
+                options: [
+                    "昆虫が多く生息しているため、容易に捕獲できるから",
+                    "土壌中の窒素やリンなどの栄養塩が不足しており、昆虫から栄養を補うため",
+                    "光が不足しているため、光合成だけではエネルギーが不足するから",
+                    "昆虫が天敵となるため、防御のために捕食するから"
+                ],
+                answer: 1,
+                explanation: "食虫植物も基本的には光合成によってエネルギーを得る植物ですが、貧栄養な湿地環境では土壌中の窒素やリンなどの栄養塩が著しく不足しています。食虫植物は昆虫を捕獲・消化することで、これらの不足する栄養塩を補う特殊な適応を進化させました。これにより、他の植物が生育困難な貧栄養環境でも生存・繁殖することが可能となっています。"
+            },
+            {
+                q: "今回のポスター作成課題において、参考資料の出典を明記する際の適切な方法はどれですか。",
+                options: [
+                    "「インターネットで調べました」と記載すれば十分である",
+                    "ウェブサイトの場合はサイト名とURL、書籍の場合は著者名・書名・出版社・発行年を具体的に明記する",
+                    "写真の出典のみ明記し、文章の情報源は記載不要である",
+                    "学校の授業での使用なので、出典の明記は必要ない"
+                ],
+                answer: 1,
+                explanation: "出典の明記は、情報の信頼性を担保し、著作権を尊重するために必要不可欠です。ウェブサイトから情報を得た場合は、サイト名とURLを明記することで、読み手が元の情報を確認できるようにします。書籍の場合は、著者名、書名、出版社、発行年を記載することで、情報の正確性と信頼性を示します。"
+            }
+        ];
+
+        // --- DOM要素 ---
+        const tabNav = document.getElementById('tab-nav');
+        const tabContainer = document.getElementById('tab-container');
+        const quizFillInContainer = document.getElementById('quiz-fill-in');
+        const quizEssayContainer = document.getElementById('quiz-essay');
+        const quizMcContainer = document.getElementById('quiz-multiple-choice');
+        const checkFillInButton = document.getElementById('check-fill-in');
+        const resetFillInButton = document.getElementById('reset-fill-in');
+        const submitMcButton = document.getElementById('submit-mc');
+        const resetMcButton = document.getElementById('reset-mc');
+
+        // --- タブ切り替え機能 ---
+        tabNav.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab-button')) {
+                // すべてのボタンとコンテンツから 'active' クラスを削除
+                tabNav.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                tabContainer.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+                // クリックされたボタンと対応するコンテンツに 'active' クラスを追加
+                const tabId = e.target.dataset.tab;
+                e.target.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            }
+        });
+
+        // --- 一問一答問題の生成 ---
+        function renderFillInQuestions() {
+            quizFillInContainer.innerHTML = '';
+            fillInQuestions.forEach((item, index) => {
+                const questionEl = document.createElement('div');
+                questionEl.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200';
+                questionEl.innerHTML = `
+                    <label for="fill-q-${index}" class="block text-sm font-medium text-gray-700 mb-2">
+                        <strong>問${index + 1}：</strong> ${item.q}
+                    </label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="fill-q-${index}" class="flex-grow form-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <div class="answer-key text-sm p-2 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800" data-answer="${item.a}">
+                            <strong>答：</strong> ${item.a}
+                        </div>
+                    </div>
+                `;
+                quizFillInContainer.appendChild(questionEl);
+            });
+        }
+
+        // 一問一答の答え合わせ
+        checkFillInButton.addEventListener('click', () => {
+            quizFillInContainer.querySelectorAll('.answer-key').forEach(el => {
+                el.style.display = 'block';
+            });
+        });
+
+        // 一問一答のリセット
+        resetFillInButton.addEventListener('click', () => {
+            quizFillInContainer.querySelectorAll('.answer-key').forEach(el => {
+                el.style.display = 'none';
+            });
+            quizFillInContainer.querySelectorAll('input[type="text"]').forEach(input => {
+                input.value = '';
+            });
+        });
+
+        // --- 論述問題の生成 ---
+        function renderEssayQuestions() {
+            quizEssayContainer.innerHTML = '';
+            essayQuestions.forEach((item, index) => {
+                const questionEl = document.createElement('div');
+                questionEl.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200';
+                questionEl.innerHTML = `
+                    <p class="font-medium text-gray-800 mb-2">
+                        <strong>問${index + 1}：</strong> ${item.q}
+                    </p>
+                    <textarea rows="3" class="form-textarea mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="解答を入力してください..."></textarea>
+                    <button class="toggle-answer text-sm text-blue-600 hover:underline mt-2">解答例を見る</button>
+                    <div class="answer-key mt-2 text-sm">
+                        <strong>解答例：</strong> ${item.a}
+                    </div>
+                `;
+                quizEssayContainer.appendChild(questionEl);
+            });
+
+            // 解答例の表示/非表示トグル
+            quizEssayContainer.querySelectorAll('.toggle-answer').forEach(button => {
+                button.addEventListener('click', () => {
+                    const answerEl = button.nextElementSibling;
+                    const isVisible = answerEl.style.display === 'block';
+                    answerEl.style.display = isVisible ? 'none' : 'block';
+                    button.textContent = isVisible ? '解答例を見る' : '解答例を隠す';
+                });
+            });
+        }
+
+        // --- 振り返り問題の生成 ---
+        function renderMcQuestions() {
+            quizMcContainer.innerHTML = '';
+            mcQuestions.forEach((item, index) => {
+                const questionEl = document.createElement('div');
+                questionEl.className = 'mc-question-container bg-white p-5 rounded-lg shadow border border-gray-200';
+                questionEl.dataset.correctAnswer = item.answer;
+
+                let optionsHtml = item.options.map((option, i) => `
+                    <label class="block cursor-pointer p-3 rounded-md border border-gray-200 hover:bg-gray-50 transition duration-200">
+                        <input type="radio" name="mc-q-${index}" value="${i}" class="form-radio text-blue-600 mr-3 focus:ring-blue-500">
+                        <span class="text-gray-700">${String.fromCharCode(65 + i)}) ${option}</span>
+                    </label>
+                `).join('');
+
+                questionEl.innerHTML = `
+                    <p class="font-semibold text-gray-800 mb-4">
+                        <strong>問題${index + 1}：</strong> ${item.q}
+                    </p>
+                    <div class="space-y-3">
+                        ${optionsHtml}
+                    </div>
+                    <div class="feedback" data-explanation="${item.explanation}"></div>
+                `;
+                quizMcContainer.appendChild(questionEl);
+            });
+        }
+
+        // 振り返り問題の採点
+        submitMcButton.addEventListener('click', () => {
+            const allQuestions = quizMcContainer.querySelectorAll('.mc-question-container');
+            allQuestions.forEach(qContainer => {
+                const correctAnswer = parseInt(qContainer.dataset.correctAnswer, 10);
+                const feedbackEl = qContainer.querySelector('.feedback');
+                const explanation = feedbackEl.dataset.explanation;
+                const selectedInput = qContainer.querySelector(`input[type="radio"]:checked`);
+                
+                // すべての選択肢のスタイルをリセット
+                qContainer.querySelectorAll('label').forEach(label => {
+                    label.classList.remove('bg-red-100', 'border-red-300', 'bg-green-100', 'border-green-300', 'font-bold');
+                });
+
+                if (selectedInput) {
+                    const selectedAnswer = parseInt(selectedInput.value, 10);
+                    const selectedLabel = selectedInput.parentElement;
+                    
+                    if (selectedAnswer === correctAnswer) {
+                        feedbackEl.className = 'feedback correct';
+                        feedbackEl.innerHTML = `<strong>正解！</strong> ${explanation}`;
+                        selectedLabel.classList.add('bg-green-100', 'border-green-300', 'font-bold');
+                    } else {
+                        feedbackEl.className = 'feedback incorrect';
+                        feedbackEl.innerHTML = `<strong>不正解...</strong> ${explanation}`;
+                        selectedLabel.classList.add('bg-red-100', 'border-red-300');
+                        // 正解の選択肢をハイライト
+                        qContainer.querySelector(`input[value="${correctAnswer}"]`).parentElement.classList.add('bg-green-100', 'border-green-300', 'font-bold');
+                    }
+                } else {
+                    // 未回答の場合
+                    feedbackEl.className = 'feedback incorrect';
+                    feedbackEl.innerHTML = `<strong>未回答です。</strong> ${explanation}`;
+                    // 正解の選択肢をハイライト
+                    qContainer.querySelector(`input[value="${correctAnswer}"]`).parentElement.classList.add('bg-green-100', 'border-green-300', 'font-bold');
+                }
+            });
+            
+            // 採点後に一番上の問題にスクロール
+            quizMcContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        // 振り返り問題のリセット
+        resetMcButton.addEventListener('click', () => {
+            const allQuestions = quizMcContainer.querySelectorAll('.mc-question-container');
+            allQuestions.forEach(qContainer => {
+                // フィードバックを隠す
+                const feedbackEl = qContainer.querySelector('.feedback');
+                feedbackEl.className = 'feedback';
+                feedbackEl.innerHTML = '';
+
+                // ラジオボタンの選択を解除
+                qContainer.querySelectorAll('input[type="radio"]').forEach(input => {
+                    input.checked = false;
+                });
+
+                // ラベルのスタイルをリセット
+                qContainer.querySelectorAll('label').forEach(label => {
+                    label.classList.remove('bg-red-100', 'border-red-300', 'bg-green-100', 'border-green-300', 'font-bold');
+                });
+            });
+        });
+
+
+        // --- 初期化 ---
+        function init() {
+            renderFillInQuestions();
+            renderEssayQuestions();
+            renderMcQuestions();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
